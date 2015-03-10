@@ -6,12 +6,13 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
+#import <AsyncDisplayKit/ASDownloaderContext.h>
 #import <AsyncDisplayKit/ASImageProtocols.h>
 
 
 /**
  * @abstract Simple NSURLSession-based image downloader.
  */
-@interface ASBasicImageDownloader : NSObject <ASImageDownloaderProtocol>
+@interface ASImageDownloader : NSObject <ASImageDownloaderProtocol>
 
 @end

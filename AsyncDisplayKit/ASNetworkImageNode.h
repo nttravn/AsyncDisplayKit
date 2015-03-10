@@ -37,7 +37,7 @@
 /**
  * Convenience initialiser.
  *
- * @returns An ASNetworkImageNode configured to use the NSURLSession-powered ASBasicImageDownloader, and no extra cache.
+ * @returns An ASNetworkImageNode configured to use the NSURLSession-powered ASImageDownloader, and no extra cache.
  */
 - (instancetype)init;
 

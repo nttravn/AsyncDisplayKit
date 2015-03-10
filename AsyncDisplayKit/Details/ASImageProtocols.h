@@ -39,7 +39,8 @@
   @param completion The block to be invoked when the download has completed, or has failed.
   @param image The image that was downloaded, if the image could be successfully downloaded; nil otherwise.
   @param error An error describing why the download of `URL` failed, if the download failed; nil otherwise.
-  @discussion If `URL` is nil, `completion` will be invoked immediately with a nil image and an error describing why the download failed.
+  @discussion If `URL` is nil, `completion` will be invoked immediately with a nil image and an error describing why the download failed. This method is likely to be called on the main thread, so any custom implementations should make
+      sure to background any expensive download operations.
   @result An opaque identifier to be used in canceling the download, via `cancelImageDownloadForIdentifier:`. You must retain the identifier if you wish to use it later.
  */
 - (id)downloadImageWithURL:(NSURL *)URL

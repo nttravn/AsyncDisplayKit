@@ -8,7 +8,7 @@
 
 #import "ASNetworkImageNode.h"
 
-#import "ASBasicImageDownloader.h"
+#import "ASImageDownloader.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASThread.h"
 
@@ -26,7 +26,7 @@
   UIImage *_defaultImage;
 
   NSUUID *_cacheUUID;
-  id _imageDownload;
+  ASDownloaderContext *_downloadContext;
 
   BOOL _imageLoaded;
 }
@@ -50,7 +50,7 @@
 
 - (instancetype)init
 {
-  return [self initWithCache:nil downloader:[[ASBasicImageDownloader alloc] init]];
+  return [self initWithCache:nil downloader:[[ASImageDownloader alloc] init]];
 }
 
 - (void)dealloc
@@ -157,19 +157,19 @@
 
 - (void)_cancelImageDownload
 {
-  if (!_imageDownload) {
+  if (!_downloadContext) {
     return;
   }
 
-  [_downloader cancelImageDownloadForIdentifier:_imageDownload];
-  _imageDownload = nil;
+  [_downloader cancelImageDownloadForIdentifier:_downloadContext];
+  _downloadContext = nil;
 
   _cacheUUID = nil;
 }
 
 - (void)_downloadImageWithCompletion:(void (^)(CGImageRef))finished
 {
-  _imageDownload = [_downloader downloadImageWithURL:_URL
+  _downloadContext = [_downloader downloadImageWithURL:_URL
                                        callbackQueue:dispatch_get_main_queue()
                                downloadProgressBlock:NULL
                                           completion:^(CGImageRef responseImage, NSError *error) {
@@ -181,7 +181,7 @@
 
 - (void)_lazilyLoadImageIfNecessary
 {
-  if (!_imageLoaded && _URL != nil && _imageDownload == nil) {
+  if (!_imageLoaded && _URL != nil && _downloadContext == nil) {
     if (_URL.isFileURL) {
       {
         ASDN::MutexLocker l(_lock);
@@ -209,12 +209,13 @@
         {
           ASDN::MutexLocker l(strongSelf->_lock);
 
-          if (responseImage != NULL) {
+          ASDownloaderContext *context = strongSelf->_downloadContext;
+          if (responseImage != NULL && ![context isInvalid]) {
             strongSelf->_imageLoaded = YES;
             strongSelf.image = [UIImage imageWithCGImage:responseImage];
           }
 
-          strongSelf->_imageDownload = nil;
+          strongSelf->_downloadContext = nil;
 
           strongSelf->_cacheUUID = nil;
         }
@@ -247,11 +248,7 @@
                                completion:cacheCompletion];
         });
       } else {
-          // NSURLSessionDownloadTask will do file I/O to create a temp directory. If called on the main thread this
-          // will cause significant performance issues.
-          dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-              [self _downloadImageWithCompletion:finished];
-          });
+            [self _downloadImageWithCompletion:finished];
       }
     }
   }

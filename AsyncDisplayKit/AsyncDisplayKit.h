@@ -15,7 +15,7 @@
 
 #import <AsyncDisplayKit/ASEditableTextNode.h>
 
-#import <AsyncDisplayKit/ASBasicImageDownloader.h>
+#import <AsyncDisplayKit/ASImageDownloader.h>
 #import <AsyncDisplayKit/ASMultiplexImageNode.h>
 #import <AsyncDisplayKit/ASNetworkImageNode.h>
 
